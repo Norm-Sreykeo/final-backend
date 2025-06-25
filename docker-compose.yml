@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Laravel App
   app:
@@ -28,6 +26,8 @@ services:
       - ./docker/nginx:/etc/nginx/conf.d
     networks:
       - drink_shop_network
+    depends_on:
+      - app
 
   # MySQL Database
   db:
@@ -36,11 +36,11 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: drink_shop
-      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_ROOT_PASSWORD: 1234
       MYSQL_USER: drink_user
       MYSQL_PASSWORD: drink_password
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
     networks:
@@ -59,6 +59,8 @@ services:
       PMA_PASSWORD: drink_password
     networks:
       - drink_shop_network
+    depends_on:
+      - db
 
 volumes:
   db_data:

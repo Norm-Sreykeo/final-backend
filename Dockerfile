@@ -1,7 +1,13 @@
 FROM php:8.2-fpm
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+# Set environment variables to avoid interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
+# ✅ Fix the Debian repo URLs to use HTTPS
+RUN find /etc/apt/sources.list.d/ -type f -exec sed -i 's|http://deb.debian.org|https://deb.debian.org|g' {} \; && \
+    apt-get clean && \
+    apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends \
     git \
     curl \
     libpng-dev \
@@ -9,10 +15,9 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     zip \
     unzip \
-    libzip-dev
-
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+    libzip-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
@@ -26,8 +31,9 @@ WORKDIR /var/www
 # Copy existing application directory contents
 COPY . /var/www
 
-# Copy existing application directory permissions
-COPY --chown=www-data:www-data . /var/www
+# Set permissions
+RUN chown -R www-data:www-data /var/www \
+    && chmod -R 755 /var/www/storage
 
 # Change current user to www
 USER www-data
