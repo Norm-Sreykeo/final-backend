@@ -27,6 +27,21 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
+    // Add this method for featured products
+    public function featured(Request $request)
+    {
+        $limit = $request->get('limit', 6);
+        
+        $products = Product::with('category')
+            ->where('is_active', true)
+            ->where('stock', '>', 0)
+            ->orderBy('rating', 'desc')
+            ->limit($limit)
+            ->get();
+
+        return response()->json($products);
+    }
+
     public function show($id)
     {
         $product = Product::with('category')->findOrFail($id);
